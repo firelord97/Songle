@@ -2,6 +2,7 @@ package com.example.s1552184.songle2
 
 import android.R.menu
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.*
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -71,7 +72,10 @@ class ListSelect : AppCompatActivity() {
                 convertView.tag = viewHolder
             }
             mainViewholder = convertView!!.tag as ViewHolder
-            mainViewholder.button!!.setOnClickListener { Toast.makeText(context, "Button was clicked for list item " + position, Toast.LENGTH_SHORT).show() }
+            mainViewholder.button!!.setOnClickListener {
+                val intent = Intent(this@ListSelect, LevelSelect::class.java)
+                intent.putExtra("SongLevel", position)
+                startActivity(intent)}
             mainViewholder.title!!.text = getItem(position)
 
             return convertView

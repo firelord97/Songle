@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.s1552184.songle2.MapsActivity" >
+
     <Button
     android:id="@+id/guess"
     android:layout_width="90dp"
@@ -16,4 +17,18 @@
     android:layout_marginTop="8dp"
     android:background="@android:color/holo_red_light"
     android:text="@string/words" />
+
+    <TextView
+        android:id="@+id/correctanswers"
+        android:layout_width="81dp"
+        android:layout_height="33dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center|center_vertical|center_horizontal"
+        android:text=""
+        android:textSize="18sp"
+        android:background="@android:color/holo_red_light"
+        tools:text="0/371" />
     </fragment>

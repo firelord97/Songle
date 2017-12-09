@@ -4,8 +4,14 @@
     <string name="button_howtoplay">How To Play</string>
     <string name="button_play">Play</string>
     <string name="maintitle">Songle</string>
-    <string name="instructions2">Songle is a location-based mobile phone puzzle game. Users follow a map and collect words which have been scattered at random around the University of Edinburgh’s Central Area. The words make up the lyrics of a well-known song and the puzzle aspect of the game is to guess the song from the words which have been found.</string>
+    <string name="instructions2">Songle is a location-based mobile phone puzzle game. Users follow a map and collect words which have been scattered at random around the University of Edinburgh’s Central Area. To collect a word click on the marker when you think you are sufficiently close. The words make up the lyrics of a well-known song and the puzzle aspect of the game is to guess the song from the words which have been found. You may ask for a hint. The map key is provided below. The more interesting a word the longer it is, potentially making it more useful.</string>
     <string name="button_guess">Guess!</string>
-    <string name="words">Check Words</string>
+    <string name="words">Guess Song</string>
     <string name="action_settings">Settings</string>
+    <string name="button_hint">Hint</string>
+    <string name="button_youtube">Watch on Youtube</string>
+    <string name="button_mainmenu">Go to Main Menu</string>
+    <string name="choosesong">Choose Song:</string>
+    <string name="chooselevel">Choose Level:</string>
+    <string name="button_giveup">Give Up</string>
 </resources>

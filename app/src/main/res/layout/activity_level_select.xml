@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.s1552184.songle2.ListSelect"
-    tools:layout_editor_absoluteX="0dp"
-    tools:layout_editor_absoluteY="0dp">
+    tools:context="com.example.s1552184.songle2.LevelSelect">
 
     <ListView
         android:id="@+id/listview"
@@ -33,7 +31,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:gravity="left|center_vertical|center_horizontal"
-        android:text="@string/choosesong"
+        android:text="@string/chooselevel"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/listview"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,5 +39,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:text="@string/choosesong" />
+        tools:text="@string/chooselevel" />
 </android.support.constraint.ConstraintLayout>

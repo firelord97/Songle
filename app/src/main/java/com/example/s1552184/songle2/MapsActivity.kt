@@ -2,6 +2,7 @@ package com.example.s1552184.songle2
 
 import android.Manifest
 import android.Manifest.permission_group.LOCATION
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
@@ -9,6 +10,10 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.ContextCompat.checkSelfPermission
+import android.util.Log
+import android.widget.TextView
+import android.widget.Toast
+import com.example.s1552184.songle2.R.raw.map5
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationListener
@@ -18,14 +23,18 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_maps.*
+import com.google.maps.android.kml.KmlLayer
+import com.google.maps.android.kml.KmlPlacemark
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
+import com.google.android.gms.maps.model.*
 
-
+var wordsguessed = 0
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
-
+        LocationListener, OnMarkerClickListener {
+    var list = mutableListOf<String>()
     private lateinit var mMap: GoogleMap
     private lateinit var mGoogleApiClient: GoogleApiClient
     val permissionsRequestAccessFineLocation = 1
@@ -45,6 +54,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build()
+        val mapIntent = intent
+        val songselect = mapIntent.getIntExtra("SelectedSong", 0)
+        val levelselect = mapIntent.getIntExtra("LevelSelect", 0)
+        val correctanswer: TextView = findViewById(R.id.correctanswers)
+        correctanswer.setText(wordsguessed.toString()+"/371");
+        guess.setOnClickListener() {
+            val intent = Intent(this, GuessActivity::class.java)
+            intent.putExtra("thesong", songselect)
+            intent.putExtra("thelevel", levelselect)
+            intent.putExtra("words", wordsguessed)
+            startActivity(intent)
+        }
     }
 
     override fun onStart() {
@@ -125,14 +146,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        try{mMap.isMyLocationEnabled = true}
-        catch(se:SecurityException){
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        try {
+            mMap.isMyLocationEnabled = true
+        } catch (se: SecurityException) {
             println("Exception onMapReady")
         }
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val Edinburgh = LatLng(55.944159, -3.187574)
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Edinburgh, 15f))
+        var layer = KmlLayer(mMap, R.raw.map5, applicationContext)
+        layer.addLayerToMap()
         mMap.uiSettings.isMyLocationButtonEnabled = true
+        mMap.setOnMarkerClickListener(this)
+    }
+
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        if(marker.title in list)
+        {}
+        else {
+            list.add(marker.title)
+            Toast.makeText(getApplicationContext(), "Word Unlocked: baby",
+                    Toast.LENGTH_LONG).show();
+            marker.setIcon((BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
+            wordsguessed = wordsguessed+1
+            val correctanswer: TextView = findViewById(R.id.correctanswers)
+            correctanswer.setText(wordsguessed.toString()+"/371");
+        }
+        return false
     }
 }
+
+
+
+

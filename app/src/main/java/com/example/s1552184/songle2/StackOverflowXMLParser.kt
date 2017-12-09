@@ -10,6 +10,9 @@ import java.io.InputStream
  * Created by s1552184 on 08/11/17.
  */
 data class Song(val number: String, val artist: String, val title: String, val link: String ) {
+    interface DownloadCompleteListener {
+        fun downloadComplete(result : String)
+    }
     private val ns: String? = null
     @Throws(XmlPullParserException::class, IOException::class)
     fun parse(input: InputStream): List<Song> {
@@ -31,7 +34,7 @@ data class Song(val number: String, val artist: String, val title: String, val l
                 continue
             }
 // Starts by looking for the entry tag
-            if (parser.name == "entry") {
+            if (parser.name == "Song") {
                 entries.add(readEntry(parser))
             } else {
                 skip(parser)

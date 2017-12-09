@@ -10,9 +10,8 @@ import java.net.URL
 /**
  * Created by s1552184 on 08/11/17.
  */
-class DownloadXmlTask(private val resources : Resources,
-                      private val caller : DownloadCompleteListener,
-                      private val summaryPref : Boolean) :
+class DownloadXmlTask(
+                      private val caller : Song.DownloadCompleteListener) :
         AsyncTask<String, Void, String>() {
     override fun doInBackground(vararg urls: String): String {
         return try {

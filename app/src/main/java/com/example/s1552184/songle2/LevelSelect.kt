@@ -11,57 +11,37 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.activity_guess.*
-import android.R.attr.duration
-import android.R.attr.editTextBackground
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.ListView
+import android.widget.TextView
+import android.widget.Toast
+import android.content.Intent.getIntent
 
-var wrongguess = 0
-class GuessActivity : AppCompatActivity() {
 
-    private val words = ArrayList<String>()
+
+
+
+class LevelSelect : AppCompatActivity() {
+
+    private val maps = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_guess)
+        setContentView(R.layout.activity_level_select)
         val lv = findViewById<ListView>(R.id.listview) as ListView
         generateListContent()
-        lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
-        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@GuessActivity, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
-        button_hint.setOnClickListener(){
-            Toast.makeText(getApplicationContext(), "New Word Unlocked: matters",
-                    Toast.LENGTH_SHORT).show();
-        }
-        val guessIntent = intent
-        val thesong = guessIntent.getIntExtra("thesong", 0)
-        val thelevel = guessIntent.getIntExtra("thelevel", 0)
-        val wordguess = guessIntent.getIntExtra("words", 0)
-        button_guesssong.setOnClickListener(){
-            val inputtext= editText.text.toString()
-            if(inputtext=="Bohemian Rhapsody") {
-                var score = (100*(371-wordguess)/371)*(1+(thelevel+1)*0.1)- (wrongguess+1)*10
-                Toast.makeText(getApplicationContext(), "Correct Answer!",
-                        Toast.LENGTH_SHORT).show();
-                val intent = Intent(this@GuessActivity, CorrectAnswer::class.java)
-                intent.putExtra("thescore", score.toInt())
-                startActivity(intent)
-            }
-            else
-            {
-                Toast.makeText(getApplicationContext(), "Incorrect Answer!",
-                        Toast.LENGTH_SHORT).show();
-                wrongguess=wrongguess+1
-            }
-        }
-
+        lv.adapter = MyListAdaper(this, R.layout.list_item, maps)
+        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@LevelSelect, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
     }
 
     private fun generateListContent() {
-        words.add("baby"+"     "+"Line:60  Word:8")
-        words.add("matters"+"     "+ "Line:68  Word:3")
-        for (i in 1..25) {
-            words.add("Word "+i)
-        }
+        maps.add("Justin Bieber (Very Easy)")
+        maps.add("Prince (Easy)")
+        maps.add("David Bowie (Moderate)")
+        maps.add("Michael Jackson (Hard)")
+        maps.add("Elvis Presley (Very Hard)")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -92,10 +72,18 @@ class GuessActivity : AppCompatActivity() {
                 val inflater = LayoutInflater.from(context)
                 convertView = inflater.inflate(layout, parent, false)
                 val viewHolder = ViewHolder()
-                viewHolder.title = convertView.findViewById<TextView>(R.id.list_view_text) as TextView
+                viewHolder.title = convertView.findViewById<TextView>(R.id.list_item_text) as TextView
+                viewHolder.button = convertView.findViewById<Button>(R.id.list_item_btn) as Button
                 convertView.tag = viewHolder
             }
             mainViewholder = convertView!!.tag as ViewHolder
+            mainViewholder.button!!.setOnClickListener {
+                val mIntent = intent
+                val selectsong = mIntent.getIntExtra("SongLevel", 0)
+                val intent = Intent(this@LevelSelect, MapsActivity::class.java)
+                intent.putExtra("SelectedSong", selectsong)
+                intent.putExtra("LevelSelect", position)
+                startActivity(intent)}
             mainViewholder.title!!.text = getItem(position)
 
             return convertView
@@ -105,6 +93,6 @@ class GuessActivity : AppCompatActivity() {
     inner class ViewHolder {
 
         internal var title: TextView? = null
-
+        internal var button: Button? = null
     }
 }
