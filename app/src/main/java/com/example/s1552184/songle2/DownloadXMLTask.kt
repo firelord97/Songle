@@ -11,7 +11,7 @@ import java.net.URL
  * Created by s1552184 on 08/11/17.
  */
 class DownloadXmlTask(
-                      private val caller : Song.DownloadCompleteListener) :
+                      private val caller : DownloadCompleteListener) :
         AsyncTask<String, Void, String>() {
     override fun doInBackground(vararg urls: String): String {
         return try {
@@ -34,7 +34,7 @@ class DownloadXmlTask(
 // Also available: HttpsURLConnection
         conn.readTimeout = 10000 // milliseconds
         conn.connectTimeout = 15000 // milliseconds
-        conn.requestMethod = " GET "
+        conn.requestMethod = "GET"
         conn.doInput = true
 // Starts the query
         conn.connect()
@@ -44,4 +44,9 @@ class DownloadXmlTask(
         super.onPostExecute(result)
         caller.downloadComplete(result)
     }
+}
+
+
+interface DownloadCompleteListener {
+    fun downloadComplete(result : String)
 }

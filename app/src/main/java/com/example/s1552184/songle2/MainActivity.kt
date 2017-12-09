@@ -8,15 +8,18 @@ import android.net.ConnectivityManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.InputStream
 
 class MainActivity : AppCompatActivity() {
-    private var receiver = NetworkReceiver()
-    var networkPref = "wifi"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        this.registerReceiver(receiver, filter)
+
+        val caller = MyDownloadCompleteListener()
+        val downloader = DownloadXmlTask(caller)
+        downloader.execute("URL")
+
         button3.setOnClickListener(){
             val intent = Intent(this, HowToPlayActivity::class.java)
             startActivity(intent)}
@@ -24,21 +27,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ListSelect::class.java)
             startActivity(intent)}
     }
-    private inner class NetworkReceiver : BroadcastReceiver()
-    { override fun onReceive(context: Context, intent: Intent)
-        {
-            val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val networkInfo = connMgr.activeNetworkInfo
-            if (networkPref == "wifi" && networkInfo?.type == ConnectivityManager.TYPE_WIFI)
-            {
-            }
-            else if (networkPref == "any" && networkInfo != null)
-            {
-// Have a network connection and permission, so use data
-            }
-            else
-            {
-            }
-        }
+
+}
+
+
+class MyDownloadCompleteListener : DownloadCompleteListener{
+    override fun downloadComplete(result: String) {
+        val parseSongs = XMLParser()
+        parseSongs.parse(result.toByteArray().inputStream())
     }
-    }
+
+}
