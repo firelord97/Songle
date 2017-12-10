@@ -31,6 +31,10 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.model.*
 
 var wordsguessed = 0
+var numberslist =ArrayList<String>()
+var titleslist =ArrayList<String>()
+var artistslist =ArrayList<String>()
+var linkslist =ArrayList<String>()
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener, OnMarkerClickListener {
@@ -54,17 +58,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build()
+        wordsguessed=0
         val mapIntent = intent
         val songselect = mapIntent.getIntExtra("SelectedSong", 0)
         val levelselect = mapIntent.getIntExtra("LevelSelect", 0)
+        numberslist = mapIntent.getStringArrayListExtra("SongsNumbers1")
+        titleslist = mapIntent.getStringArrayListExtra("SongsTitles1")
+        artistslist = mapIntent.getStringArrayListExtra("SongsArtists1")
+        linkslist = mapIntent.getStringArrayListExtra("SongsLinks1")
         val correctanswer: TextView = findViewById(R.id.correctanswers)
         correctanswer.setText(wordsguessed.toString()+"/371");
         guess.setOnClickListener() {
             val intent = Intent(this, GuessActivity::class.java)
-            intent.putExtra("thesong", songselect)
+            intent.putExtra("title", titleslist.get(songselect))
+            intent.putExtra("artist", artistslist.get(songselect))
+            intent.putExtra("link", linkslist.get(songselect))
             intent.putExtra("thelevel", levelselect)
             intent.putExtra("words", wordsguessed)
             startActivity(intent)
+
         }
     }
 

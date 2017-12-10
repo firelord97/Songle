@@ -25,11 +25,21 @@ import android.content.Intent.getIntent
 
 
 class LevelSelect : AppCompatActivity() {
-
+    var numberslist =ArrayList<String>()
+    var titleslist =ArrayList<String>()
+    var artistslist =ArrayList<String>()
+    var linkslist =ArrayList<String>()
+    var selectsong = 0
     private val maps = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_level_select)
+        val mIntent = intent
+        numberslist = mIntent.getStringArrayListExtra("SongsNumbers1")
+        titleslist = mIntent.getStringArrayListExtra("SongsTitles1")
+        artistslist = mIntent.getStringArrayListExtra("SongsArtists1")
+        linkslist = mIntent.getStringArrayListExtra("SongsLinks1")
+        selectsong = mIntent.getIntExtra("SongLevel", 0)
         val lv = findViewById<ListView>(R.id.listview) as ListView
         generateListContent()
         lv.adapter = MyListAdaper(this, R.layout.list_item, maps)
@@ -78,12 +88,15 @@ class LevelSelect : AppCompatActivity() {
             }
             mainViewholder = convertView!!.tag as ViewHolder
             mainViewholder.button!!.setOnClickListener {
-                val mIntent = intent
-                val selectsong = mIntent.getIntExtra("SongLevel", 0)
                 val intent = Intent(this@LevelSelect, MapsActivity::class.java)
                 intent.putExtra("SelectedSong", selectsong)
                 intent.putExtra("LevelSelect", position)
-                startActivity(intent)}
+                intent.putStringArrayListExtra("SongsNumbers1", numberslist)
+                intent.putStringArrayListExtra("SongsTitles1", titleslist)
+                intent.putStringArrayListExtra("SongsArtists1", artistslist)
+                intent.putStringArrayListExtra("SongsLinks1", linkslist)
+                startActivity(intent)
+                }
             mainViewholder.title!!.text = getItem(position)
 
             return convertView

@@ -13,13 +13,16 @@ class CorrectAnswer : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_correct_answer)
         val score = intent.getIntExtra("thescore", 0)
-        songinfo.setText("Score : "+score.toString()+ "\n Artist: Queen\n"+"Song:Bohemian Rhapsody")
+        val title = intent.getStringExtra("thetitle")
+        val artist = intent.getStringExtra("theartist")
+        val link = intent.getStringExtra("thelink")
+        songinfo.setText("Score : "+score.toString()+ "\n Artist: "+artist+"\nSong: "+title)
         mainmenu.setOnClickListener(){
             val intent = Intent(this@CorrectAnswer, MainActivity::class.java)
             startActivity(intent)
         }
         youtube.setOnClickListener(){
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/fJ9rUzIMcZQ")))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link)))
             Log.i("Video", "Video Playing....")
         }
     }
@@ -27,5 +30,6 @@ class CorrectAnswer : AppCompatActivity() {
     override fun onBackPressed() {
         val intent = Intent(this@CorrectAnswer, MainActivity::class.java)
         startActivity(intent)
+        finish()
     }
 }

@@ -28,23 +28,30 @@ class GuessActivity : AppCompatActivity() {
         generateListContent()
         lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
         lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@GuessActivity, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
+        val guessIntent = intent
+        val title = guessIntent.getStringExtra("title")
+        val link = guessIntent.getStringExtra("link")
+        val artist = guessIntent.getStringExtra("artist")
+        val thelevel = guessIntent.getIntExtra("thelevel", 0)
+        var wordguess = guessIntent.getIntExtra("words", 0)
         button_hint.setOnClickListener(){
             Toast.makeText(getApplicationContext(), "New Word Unlocked: matters",
                     Toast.LENGTH_SHORT).show();
+            wordguess+1
         }
-        val guessIntent = intent
-        val thesong = guessIntent.getIntExtra("thesong", 0)
-        val thelevel = guessIntent.getIntExtra("thelevel", 0)
-        val wordguess = guessIntent.getIntExtra("words", 0)
         button_guesssong.setOnClickListener(){
             val inputtext= editText.text.toString()
-            if(inputtext=="Bohemian Rhapsody") {
+            if(inputtext.equals(title, ignoreCase = true)) {
                 var score = (100*(371-wordguess)/371)*(1+(thelevel+1)*0.1)- (wrongguess+1)*10
                 Toast.makeText(getApplicationContext(), "Correct Answer!",
                         Toast.LENGTH_SHORT).show();
                 val intent = Intent(this@GuessActivity, CorrectAnswer::class.java)
                 intent.putExtra("thescore", score.toInt())
+                intent.putExtra("thetitle", title)
+                intent.putExtra("thelink", link)
+                intent.putExtra("theartist", artist)
                 startActivity(intent)
+
             }
             else
             {

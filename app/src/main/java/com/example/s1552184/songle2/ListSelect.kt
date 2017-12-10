@@ -83,7 +83,12 @@ class ListSelect : AppCompatActivity() {
             mainViewholder.button!!.setOnClickListener {
                 val intent = Intent(this@ListSelect, LevelSelect::class.java)
                 intent.putExtra("SongLevel", position)
-                startActivity(intent)}
+                intent.putStringArrayListExtra("SongsNumbers1", numberslist)
+                intent.putStringArrayListExtra("SongsTitles1", titleslist)
+                intent.putStringArrayListExtra("SongsArtists1", artistslist)
+                intent.putStringArrayListExtra("SongsLinks1", linkslist)
+                startActivity(intent)
+                }
             mainViewholder.title!!.text = getItem(position)
 
             return convertView
