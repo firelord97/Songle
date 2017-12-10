@@ -22,11 +22,19 @@ import android.widget.Toast
 
 
 class ListSelect : AppCompatActivity() {
-
+    var numberslist =ArrayList<String>()
+    var titleslist =ArrayList<String>()
+    var artistslist =ArrayList<String>()
+    var linkslist =ArrayList<String>()
     private val data = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_select)
+        val mIntent = intent
+        numberslist = mIntent.getStringArrayListExtra("SongsNumbers1")
+        titleslist = mIntent.getStringArrayListExtra("SongsTitles1")
+        artistslist = mIntent.getStringArrayListExtra("SongsArtists1")
+        linkslist = mIntent.getStringArrayListExtra("SongsLinks1")
         val lv = findViewById<ListView>(R.id.listview) as ListView
         generateListContent()
         lv.adapter = MyListAdaper(this, R.layout.list_item, data)
@@ -34,8 +42,8 @@ class ListSelect : AppCompatActivity() {
     }
 
     private fun generateListContent() {
-        for (i in 1..18) {
-            data.add("Song " + i)
+        for (i in 0..numberslist.size-1) {
+            data.add("Song " + (i+1))
         }
     }
 

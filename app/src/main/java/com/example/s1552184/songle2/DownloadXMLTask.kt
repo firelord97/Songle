@@ -1,17 +1,19 @@
 package com.example.s1552184.songle2
 import android.content.res.Resources
 import android.os.AsyncTask
+import android.util.Log
 import org.xmlpull.v1.XmlPullParserException
+import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
+import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
  * Created by s1552184 on 08/11/17.
  */
-class DownloadXmlTask(
-                      private val caller : DownloadCompleteListener) :
+class DownloadXmlTask(private val caller : DownloadCompleteListener) :
         AsyncTask<String, Void, String>() {
     override fun doInBackground(vararg urls: String): String {
         return try {
@@ -23,25 +25,23 @@ class DownloadXmlTask(
         }
     }
     private fun loadXmlFromNetwork(urlString: String): String {
-        val result = StringBuilder()
         val stream = downloadUrl(urlString)
-        return result.toString()
+        return stream
     }
     @Throws(IOException::class)
-    private fun downloadUrl(urlString: String): InputStream {
+    private fun downloadUrl(urlString: String): String {
         val url = URL(urlString)
-        val conn = url.openConnection() as HttpURLConnection
-// Also available: HttpsURLConnection
-        conn.readTimeout = 10000 // milliseconds
-        conn.connectTimeout = 15000 // milliseconds
-        conn.requestMethod = "GET"
-        conn.doInput = true
-// Starts the query
-        conn.connect()
-        return conn.inputStream
+        val input = url.openStream()
+        val reader = BufferedReader(InputStreamReader(input))
+        val result=StringBuilder()
+        var line:String? = reader.readLine()
+        while(line!=null) {
+            result.append(line)
+            line = reader.readLine()
+        }
+        return result.toString()
     }
     override fun onPostExecute(result: String) {
-        super.onPostExecute(result)
         caller.downloadComplete(result)
     }
 }

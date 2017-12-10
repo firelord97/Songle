@@ -1,30 +1,29 @@
 package com.example.s1552184.songle2
 
+import android.util.Log
 import android.util.Xml
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.io.InputStream
 
-/**
- * Created by anirudh on 09/12/17.
- */
 class XMLParser(){
     private val ns: String? = null
     @Throws(XmlPullParserException::class, IOException::class)
-    fun parse(input: InputStream): List<Song> {
-        input.use {
+    fun parse(input: String): ArrayList<Song> {
             val parser = Xml.newPullParser()
+            val stream: InputStream = input.byteInputStream()
+            Log.d("okk", stream.toString())
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-            parser.setInput(input, null)
+            parser.setInput(stream, null)
             parser.nextTag()
+            Log.d("set one", "set one")
             return readFeed(parser)
-        }
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readFeed(parser: XmlPullParser): List<Song> {
-        val entries = ArrayList<Song>()
+    private fun readFeed(parser: XmlPullParser): ArrayList<Song> {
+        val songs = ArrayList<Song>()
         parser.require(XmlPullParser.START_TAG, ns, "Songs")
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
@@ -32,12 +31,12 @@ class XMLParser(){
             }
 // Starts by looking for the entry tag
             if (parser.name == "Song") {
-                entries.add(readEntry(parser))
+                songs.add(readEntry(parser))
             } else {
                 skip(parser)
             }
         }
-        return entries
+        return songs
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -46,16 +45,15 @@ class XMLParser(){
         var number = ""
         var artist = ""
         var title = ""
-        var link =""
+        var link = ""
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG)
                 continue
             when (parser.name) {
                 "Number" -> number = readNumber(parser)
                 "Artist" -> artist = readArtist(parser)
-                "Title" -> link = readTitle(parser)
-                "link" -> link = readLink(parser)
-                //list.add(Song(number,artist,...))
+                "Title" -> title = readTitle(parser)
+                "Link" -> link = readLink(parser)
                 else -> skip(parser)
             }
         }
