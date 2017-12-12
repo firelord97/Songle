@@ -19,7 +19,8 @@ import android.widget.ListView
 
 var wrongguess = 0
 class GuessActivity : AppCompatActivity() {
-
+    var list = ArrayList<String>()
+    var lyrics = ArrayList<String>()
     private val words = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +34,8 @@ class GuessActivity : AppCompatActivity() {
         val link = guessIntent.getStringExtra("link")
         val artist = guessIntent.getStringExtra("artist")
         val thelevel = guessIntent.getIntExtra("thelevel", 0)
+        list = guessIntent.getStringArrayListExtra("unlockedwords")
+        lyrics = guessIntent.getStringArrayListExtra("lyrics")
         var wordguess = guessIntent.getIntExtra("words", 0)
         button_hint.setOnClickListener(){
             Toast.makeText(getApplicationContext(), "New Word Unlocked: matters",
@@ -64,10 +67,28 @@ class GuessActivity : AppCompatActivity() {
     }
 
     private fun generateListContent() {
-        words.add("baby"+"     "+"Line:60  Word:8")
-        words.add("matters"+"     "+ "Line:68  Word:3")
-        for (i in 1..25) {
-            words.add("Word "+i)
+        for (item in list) {
+            var line = 0
+            var position = 0
+            for (char in item) {
+                if (char == ':') {
+                    line = item.substring(0, item.indexOf(':')).toInt()
+                    position = item.substring(item.indexOf(':'), item.length).toInt()
+                }
+            }
+            var string = lyrics.get(line - 1)
+            var spaces = 0
+            var point = 0
+            for (char in 0..string.length) {
+                if (string[char] == ' ') {
+                    spaces = spaces + 1
+                    if (spaces == position) {
+                        words.add(string.substring(point, char))
+                        spaces += 1
+                    } else
+                        point = char + 1
+                }
+            }
         }
     }
 

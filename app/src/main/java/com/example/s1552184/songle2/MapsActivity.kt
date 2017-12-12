@@ -2,9 +2,11 @@ package com.example.s1552184.songle2
 
 import android.Manifest
 import android.Manifest.permission_group.LOCATION
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -29,16 +31,24 @@ import com.google.maps.android.kml.KmlLayer
 import com.google.maps.android.kml.KmlPlacemark
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.model.*
+import com.google.maps.android.kml.KmlContainer
+import java.io.File
+import java.io.InputStream
 
 var wordsguessed = 0
 var numberslist =ArrayList<String>()
 var titleslist =ArrayList<String>()
 var artistslist =ArrayList<String>()
 var linkslist =ArrayList<String>()
+var songselect: Int = 0
+var levelselect: Int = 0
+var mapname=""
+var wordcount= 0
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener, OnMarkerClickListener {
-    var list = mutableListOf<String>()
+    var list = ArrayList<String>()
+    var lyrics = ArrayList<String>()
     private lateinit var mMap: GoogleMap
     private lateinit var mGoogleApiClient: GoogleApiClient
     val permissionsRequestAccessFineLocation = 1
@@ -58,16 +68,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build()
-        wordsguessed=0
+        wordsguessed = 0
         val mapIntent = intent
-        val songselect = mapIntent.getIntExtra("SelectedSong", 0)
-        val levelselect = mapIntent.getIntExtra("LevelSelect", 0)
+        songselect = mapIntent.getIntExtra("SelectedSong", 0)
+        levelselect = mapIntent.getIntExtra("LevelSelect", 0)
         numberslist = mapIntent.getStringArrayListExtra("SongsNumbers1")
         titleslist = mapIntent.getStringArrayListExtra("SongsTitles1")
         artistslist = mapIntent.getStringArrayListExtra("SongsArtists1")
         linkslist = mapIntent.getStringArrayListExtra("SongsLinks1")
-        val correctanswer: TextView = findViewById(R.id.correctanswers)
-        correctanswer.setText(wordsguessed.toString()+"/371");
+        val caller = MapDownloadListener()
+        val lyriccaller = LyricDownloadListener()
+        val lyricdownloader = DownloadXmlTask(lyriccaller)
+        val downloader = DownloadXmlTask(caller)
+        if (songselect < 9) {
+            downloader.execute("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/0" + (songselect + 1).toString() + "/map" + (5 - levelselect).toString() + ".kml")
+            lyricdownloader.execute("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/0" + (songselect + 1).toString() + "/lyrics.txt")
+        } else {
+            downloader.execute("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/" + (songselect + 1).toString() + "/map" + (5 - levelselect).toString() + ".kml")
+            lyricdownloader.execute("http://www.inf.ed.ac.uk/teaching/courses/cslp/data/songs/" + (songselect + 1).toString() + "/lyrics.txt")
+        }
         guess.setOnClickListener() {
             val intent = Intent(this, GuessActivity::class.java)
             intent.putExtra("title", titleslist.get(songselect))
@@ -75,6 +94,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             intent.putExtra("link", linkslist.get(songselect))
             intent.putExtra("thelevel", levelselect)
             intent.putExtra("words", wordsguessed)
+            intent.putStringArrayListExtra("unlockedwords", list)
+            intent.putStringArrayListExtra("lyrics", lyrics)
             startActivity(intent)
 
         }
@@ -167,28 +188,78 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         // Add a marker in Sydney and move the camera
         val Edinburgh = LatLng(55.944159, -3.187574)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Edinburgh, 15f))
-        var layer = KmlLayer(mMap, R.raw.map5, applicationContext)
-        layer.addLayerToMap()
-        mMap.uiSettings.isMyLocationButtonEnabled = true
-        mMap.setOnMarkerClickListener(this)
     }
 
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(marker.title in list)
-        {}
-        else {
-            list.add(marker.title)
-            Toast.makeText(getApplicationContext(), "Word Unlocked: baby",
-                    Toast.LENGTH_LONG).show();
-            marker.setIcon((BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
-            wordsguessed = wordsguessed+1
-            val correctanswer: TextView = findViewById(R.id.correctanswers)
-            correctanswer.setText(wordsguessed.toString()+"/371");
+        val temp = Location(LocationManager.GPS_PROVIDER)
+        temp.setLatitude(marker.position.latitude)
+        temp.setLongitude(marker.position.longitude)
+        if (mLastLocation!!.distanceTo(temp) < 30) {
+            if (marker.title in list) {
+            } else {
+                list.add(marker.title)
+                marker.setIcon((BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
+                wordsguessed = wordsguessed + 1
+                val correctanswer: TextView = findViewById(R.id.correctanswers)
+                correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "You are too far away to unlock the word",
+                    Toast.LENGTH_SHORT).show();
         }
         return false
     }
-}
+
+    fun showMap() {
+        val inputStream: InputStream = openFileInput(mapname)
+        val layer = KmlLayer(mMap, inputStream, applicationContext)
+        layer.addLayerToMap()
+        val inputAsString = openFileInput(mapname).bufferedReader().use { it.readText() }
+        wordcount = inputAsString.split("<name>").size - 1
+        val correctanswer: TextView = findViewById(R.id.correctanswers)
+        correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        mMap.setOnMarkerClickListener(this)
+        var totcounter = 0
+        for (item in lyrics) {
+            var counter = 0
+            for (char in item) {
+                if (char == ' ') {
+                    counter += 1
+                }
+            }
+            totcounter += counter + 1
+            Log.d("lyrics", item + totcounter.toString())
+        }
+    }
+
+    inner class MapDownloadListener() : DownloadCompleteListener {
+        override fun downloadComplete(result: String) {
+            mapname = "song" + (songselect + 1).toString() + "map" + (levelselect + 1).toString()
+            val fos = openFileOutput(mapname, Context.MODE_PRIVATE)
+            fos.write(result.toByteArray())
+            fos.close()
+        }
+    }
+
+    inner class LyricDownloadListener() : DownloadCompleteListener {
+        override fun downloadComplete(result: String) {
+            var count = 0
+            for (item in 0..result.length - 1) {
+                if (result[item] == '\n') {
+                            var tempstring = result.substring(count, item)
+                            val re = Regex("[^-A-Za-z0-9\n ]")
+                            tempstring = re.replace(tempstring, "") // works
+                            lyrics.add(tempstring)
+                            count = item + 1
+                        }
+                }
+                showMap()
+            }
+        }
+    }
+
 
 
 

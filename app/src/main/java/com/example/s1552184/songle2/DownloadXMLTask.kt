@@ -36,8 +36,9 @@ class DownloadXmlTask(private val caller : DownloadCompleteListener) :
         val result=StringBuilder()
         var line:String? = reader.readLine()
         while(line!=null) {
-            result.append(line)
+            result.append(line + "\n")
             line = reader.readLine()
+
         }
         return result.toString()
     }
