@@ -96,6 +96,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             intent.putExtra("words", wordsguessed)
             intent.putStringArrayListExtra("unlockedwords", list)
             intent.putStringArrayListExtra("lyrics", lyrics)
+            intent.putExtra("totalwords", wordcount)
             startActivity(intent)
 
         }
@@ -203,6 +204,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
                 wordsguessed = wordsguessed + 1
                 val correctanswer: TextView = findViewById(R.id.correctanswers)
                 correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
+                    var item=marker.title.toString()
+                    var line = 0
+                    var position = 0
+                    for (char in item) {
+                        if (char == ':') {
+                            line = item.substring(0, item.indexOf(':')).toInt()
+                            position = item.substring(item.indexOf(':') + 1, item.length).toInt()
+                        }
+                    }
+                        var string = lyrics.get(line - 1)
+                    var spaces = 0
+                    var point = 0
+                    for (char in 0..string.length-1) {
+                        if (string[char] == ' ' || char==string.length-1) {
+                            spaces = spaces + 1
+                            if (spaces == position) {
+                                Toast.makeText(getApplicationContext(), "New word unlocked: "+string.substring(point, char+1),
+                                        Toast.LENGTH_SHORT).show();
+                                spaces += 1
+                            } else
+                                point = char + 1
+                        }
+                    }
+
             }
         } else {
             Toast.makeText(getApplicationContext(), "You are too far away to unlock the word",
@@ -221,17 +246,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
         mMap.uiSettings.isMyLocationButtonEnabled = true
         mMap.setOnMarkerClickListener(this)
-        var totcounter = 0
-        for (item in lyrics) {
-            var counter = 0
-            for (char in item) {
-                if (char == ' ') {
-                    counter += 1
-                }
-            }
-            totcounter += counter + 1
-            Log.d("lyrics", item + totcounter.toString())
-        }
     }
 
     inner class MapDownloadListener() : DownloadCompleteListener {
@@ -249,7 +263,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             for (item in 0..result.length - 1) {
                 if (result[item] == '\n') {
                             var tempstring = result.substring(count, item)
-                            val re = Regex("[^-A-Za-z0-9\n ]")
+                            val re = Regex("[^-A-Za-z0-9\n' ]")
                             tempstring = re.replace(tempstring, "") // works
                             lyrics.add(tempstring)
                             count = item + 1

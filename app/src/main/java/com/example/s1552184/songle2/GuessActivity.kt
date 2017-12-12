@@ -14,21 +14,24 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_guess.*
 import android.R.attr.duration
 import android.R.attr.editTextBackground
+import android.util.Log
 import android.widget.*
 import android.widget.ListView
+import java.util.*
+import kotlin.collections.ArrayList
 
 var wrongguess = 0
 class GuessActivity : AppCompatActivity() {
     var list = ArrayList<String>()
     var lyrics = ArrayList<String>()
+    var totwords = 0
+    var wordguess = 0
+    val random = Random()
+    var remainingwords = ArrayList<String>()
     private val words = ArrayList<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_guess)
-        val lv = findViewById<ListView>(R.id.listview) as ListView
-        generateListContent()
-        lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
-        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@GuessActivity, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
         val guessIntent = intent
         val title = guessIntent.getStringExtra("title")
         val link = guessIntent.getStringExtra("link")
@@ -36,16 +39,36 @@ class GuessActivity : AppCompatActivity() {
         val thelevel = guessIntent.getIntExtra("thelevel", 0)
         list = guessIntent.getStringArrayListExtra("unlockedwords")
         lyrics = guessIntent.getStringArrayListExtra("lyrics")
-        var wordguess = guessIntent.getIntExtra("words", 0)
-        button_hint.setOnClickListener(){
-            Toast.makeText(getApplicationContext(), "New Word Unlocked: matters",
-                    Toast.LENGTH_SHORT).show();
-            wordguess+1
+        wordguess = guessIntent.getIntExtra("words", 0)
+        totwords = guessIntent.getIntExtra("totalwords", 0)
+        val lv = findViewById<ListView>(R.id.listview) as ListView
+        generateListContent()
+        lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
+        lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> }
+        button_hint.setOnClickListener() {
+            var hintline = 0
+            val random = Random()
+            if (wordguess != totwords) {
+                hintline=rand(0, remainingwords.size)
+                var word=remainingwords.get(hintline)
+                var actualword=word.substring(0, word.indexOf(","))
+                var line = word.substring(word.indexOf(",")+1, word.lastIndexOf(","))
+                var position = word.substring(word.lastIndexOf(",")+1, word.length )
+                Toast.makeText(getApplicationContext(), "Word unlocked: "+actualword,
+                        Toast.LENGTH_SHORT).show();
+                remainingwords.removeAt(hintline)
+                words.add(actualword+"   Line:"+line+" Word:"+position)
+                lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
+                wordguess+=1
+            } else {
+                Toast.makeText(getApplicationContext(), "All words unlocked",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
-        button_guesssong.setOnClickListener(){
-            val inputtext= editText.text.toString()
-            if(inputtext.equals(title, ignoreCase = true)) {
-                var score = (100*(371-wordguess)/371)*(1+(thelevel+1)*0.1)- (wrongguess+1)*10
+        button_guesssong.setOnClickListener() {
+            val inputtext = editText.text.toString()
+            if (inputtext.equals(title, ignoreCase = true)) {
+                var score = (100 * (totwords - wordguess) / totwords) * (1 + (thelevel + 1) * 0.2) - (wrongguess + 1) * 10
                 Toast.makeText(getApplicationContext(), "Correct Answer!",
                         Toast.LENGTH_SHORT).show();
                 val intent = Intent(this@GuessActivity, CorrectAnswer::class.java)
@@ -55,35 +78,51 @@ class GuessActivity : AppCompatActivity() {
                 intent.putExtra("theartist", artist)
                 startActivity(intent)
 
-            }
-            else
-            {
+            } else {
                 Toast.makeText(getApplicationContext(), "Incorrect Answer!",
                         Toast.LENGTH_SHORT).show();
-                wrongguess=wrongguess+1
+                wrongguess = wrongguess + 1
             }
         }
 
     }
 
     private fun generateListContent() {
+        for (item in 0..lyrics.size-1) {
+            if(lyrics.get(item)!="") {
+                var string = lyrics.get(item)
+                var spaces = 0
+                var point = 0
+                for (char in 0..string.length - 1) {
+                    if (string[char] == ' ' || char == string.length - 1) {
+                        spaces = spaces + 1
+                        remainingwords.add(string.substring(point, char+1)+","+(item+1).toString()+","+spaces.toString())
+                        point=char+1
+                    }
+                }
+            }
+        }
         for (item in list) {
             var line = 0
             var position = 0
             for (char in item) {
                 if (char == ':') {
                     line = item.substring(0, item.indexOf(':')).toInt()
-                    position = item.substring(item.indexOf(':'), item.length).toInt()
+                    position = item.substring(item.indexOf(':') + 1, item.length).toInt()
                 }
             }
             var string = lyrics.get(line - 1)
             var spaces = 0
             var point = 0
-            for (char in 0..string.length) {
-                if (string[char] == ' ') {
+            for (char in 0..string.length - 1) {
+                if (string[char] == ' ' || char == string.length - 1) {
                     spaces = spaces + 1
                     if (spaces == position) {
-                        words.add(string.substring(point, char))
+                        words.add(string.substring(point, char + 1) + "   Line:" + line.toString() + " Word:" + position.toString())
+                        if(string.substring(point, char+1) in remainingwords)
+                        {
+                            remainingwords.remove(string.substring(point, char+1)+","+line.toString()+","+position.toString())
+                        }
                         spaces += 1
                     } else
                         point = char + 1
@@ -92,10 +131,14 @@ class GuessActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
+    }
+    fun rand(from: Int, to: Int) : Int {
+        return random.nextInt(to - from) + from
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
