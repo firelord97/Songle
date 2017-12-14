@@ -97,7 +97,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             intent.putStringArrayListExtra("unlockedwords", list)
             intent.putStringArrayListExtra("lyrics", lyrics)
             intent.putExtra("totalwords", wordcount)
-            startActivity(intent)
+            startActivityForResult(intent, 0)
+
 
         }
     }
@@ -198,6 +199,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         temp.setLongitude(marker.position.longitude)
         if (mLastLocation!!.distanceTo(temp) < 30) {
             if (marker.title in list) {
+                Toast.makeText(getApplicationContext(), "Word already unlocked",
+                        Toast.LENGTH_SHORT).show();
+                marker.setIcon((BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
             } else {
                 list.add(marker.title)
                 marker.setIcon((BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
@@ -246,6 +250,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
         mMap.uiSettings.isMyLocationButtonEnabled = true
         mMap.setOnMarkerClickListener(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode==0)
+        {
+            list=data.getStringArrayListExtra("listofwords")
+            wordsguessed = data.getIntExtra("wordsguessed", 0)
+            val correctanswer: TextView = findViewById(R.id.correctanswers)
+            correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
+
+        }
     }
 
     inner class MapDownloadListener() : DownloadCompleteListener {

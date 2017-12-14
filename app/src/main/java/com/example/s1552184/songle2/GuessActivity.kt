@@ -58,6 +58,7 @@ class GuessActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT).show();
                 remainingwords.removeAt(hintline)
                 words.add(actualword+"   Line:"+line+" Word:"+position)
+                list.add(line+":"+position)
                 lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
                 wordguess+=1
             } else {
@@ -83,6 +84,16 @@ class GuessActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT).show();
                 wrongguess = wrongguess + 1
             }
+        }
+        give_up.setOnClickListener()
+        {
+            var score=0
+            val intent = Intent(this@GuessActivity, CorrectAnswer::class.java)
+            intent.putExtra("thescore", score.toInt())
+            intent.putExtra("thetitle", title)
+            intent.putExtra("thelink", link)
+            intent.putExtra("theartist", artist)
+            startActivity(intent)
         }
 
     }
@@ -152,6 +163,14 @@ class GuessActivity : AppCompatActivity() {
             true
         } else super.onOptionsItemSelected(item)
 
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent()
+        intent.putStringArrayListExtra("listofwords", list)
+        intent.putExtra("wordsguessed", wordguess)
+        setResult(0, intent)
+        super.onBackPressed()
     }
 
     inner class MyListAdaper constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {

@@ -30,6 +30,5 @@ class CorrectAnswer : AppCompatActivity() {
     override fun onBackPressed() {
         val intent = Intent(this@CorrectAnswer, MainActivity::class.java)
         startActivity(intent)
-        finish()
     }
 }
