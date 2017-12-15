@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Songle2</string>
+    <string name="app_name">Songle</string>
     <string name="title_activity_maps">Map</string>
     <string name="button_howtoplay">How To Play</string>
     <string name="button_play">Play</string>
