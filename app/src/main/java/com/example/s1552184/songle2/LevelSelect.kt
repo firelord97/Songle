@@ -25,12 +25,14 @@ import android.content.Intent.getIntent
 
 
 class LevelSelect : AppCompatActivity() {
+    //Save song list details from intent
     var numberslist =ArrayList<String>()
     var titleslist =ArrayList<String>()
     var artistslist =ArrayList<String>()
     var linkslist =ArrayList<String>()
     var selectsong = 0
-    private val maps = ArrayList<String>()
+    private val maps = ArrayList<String>() //list to store map levels
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_level_select)
@@ -40,9 +42,10 @@ class LevelSelect : AppCompatActivity() {
         artistslist = mIntent.getStringArrayListExtra("SongsArtists1")
         linkslist = mIntent.getStringArrayListExtra("SongsLinks1")
         selectsong = mIntent.getIntExtra("SongLevel", 0)
+        //display list of levels using adapter
         val lv = findViewById<ListView>(R.id.listview) as ListView
         generateListContent()
-        lv.adapter = MyListAdaper(this, R.layout.list_item, maps)
+        lv.adapter = MyListAdapter(this, R.layout.list_item, maps)
         lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@LevelSelect, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
     }
 
@@ -73,7 +76,7 @@ class LevelSelect : AppCompatActivity() {
 
     }
 
-    inner class MyListAdaper constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
+    inner class MyListAdapter constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             var convertView = convertView

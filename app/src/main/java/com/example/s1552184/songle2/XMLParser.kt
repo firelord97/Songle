@@ -6,7 +6,7 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.io.InputStream
-
+//modified parser provided in lectures to search for 4 required tags
 class XMLParser(){
     private val ns: String? = null
     @Throws(XmlPullParserException::class, IOException::class)

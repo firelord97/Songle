@@ -22,25 +22,30 @@ import android.widget.Toast
 
 
 class ListSelect : AppCompatActivity() {
+    //Receive details of song list and store them in variables
     var numberslist =ArrayList<String>()
     var titleslist =ArrayList<String>()
     var artistslist =ArrayList<String>()
     var linkslist =ArrayList<String>()
     private val data = ArrayList<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_select)
+        //receive detials of songlist
         val mIntent = intent
         numberslist = mIntent.getStringArrayListExtra("SongsNumbers1")
         titleslist = mIntent.getStringArrayListExtra("SongsTitles1")
         artistslist = mIntent.getStringArrayListExtra("SongsArtists1")
         linkslist = mIntent.getStringArrayListExtra("SongsLinks1")
         val lv = findViewById<ListView>(R.id.listview) as ListView
+        //produces list of items the adapter will display
         generateListContent()
-        lv.adapter = MyListAdaper(this, R.layout.list_item, data)
+        //display list of song choices
+        lv.adapter = MyListAdapter(this, R.layout.list_item, data)
         lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> Toast.makeText(this@ListSelect, "List item was clicked at " + position, Toast.LENGTH_SHORT).show() }
     }
-
+    //list to be displayed
     private fun generateListContent() {
         for (i in 0..numberslist.size-1) {
             data.add("Song " + (i+1))
@@ -66,7 +71,7 @@ class ListSelect : AppCompatActivity() {
 
     }
 
-     inner class MyListAdaper constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
+     inner class MyListAdapter constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             var convertView = convertView

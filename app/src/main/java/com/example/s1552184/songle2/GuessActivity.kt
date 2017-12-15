@@ -17,22 +17,25 @@ import android.R.attr.editTextBackground
 import android.util.Log
 import android.widget.*
 import android.widget.ListView
+import kotlinx.android.synthetic.main.activity_maps.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-var wrongguess = 0
 class GuessActivity : AppCompatActivity() {
-    var list = ArrayList<String>()
-    var lyrics = ArrayList<String>()
-    var totwords = 0
-    var wordguess = 0
-    var hintguess=0
-    val random = Random()
-    var remainingwords = ArrayList<String>()
-    private val words = ArrayList<String>()
+    var hasgoneback=0 //1 if user has gone back to mapactivity
+    var wrongguess = 0 //number of incorrect guesses
+    var list = ArrayList<String>() //list of unlocke word tags
+    var lyrics = ArrayList<String>() //lyrics list where each element is a line of the song
+    var totwords = 0 //total words on the map
+    var wordguess = 0 //number of words user has unlocked by walking
+    var hintguess=0 //number of hints user has used
+    val random = Random() //Random fucntion to choose which random word user unlocks
+    var remainingwords = ArrayList<String>() //list of words not unlocked yet
+    private val words = ArrayList<String>() //list of words unlocked encoded with line they are in and their position, this is displayed on the listview
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_guess)
+        //receive intent values
         val guessIntent = intent
         val title = guessIntent.getStringExtra("title")
         val link = guessIntent.getStringExtra("link")
@@ -43,15 +46,24 @@ class GuessActivity : AppCompatActivity() {
         wordguess = guessIntent.getIntExtra("words", 0)
         totwords = guessIntent.getIntExtra("totalwords", 0)
         hintguess = guessIntent.getIntExtra("hintused", 0)
+        wrongguess= guessIntent.getIntExtra("wrongguess", 0)
+        hasgoneback=guessIntent.getIntExtra("hasgoneback", 0)
+        remainingwords=guessIntent.getStringArrayListExtra("remainingwords")
+
         val lv = findViewById<ListView>(R.id.listview) as ListView
-        generateListContent()
-        lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
+        generateListContent() //generate list of words to be displayed as well as remaining words
+        //display list
+        if(hasgoneback==0)//generate only once
+        generateremainingwords() //don't regenerate remainingwords if user has come back for 2nd time, don't want same word as hint again
+
+        lv.adapter = MyListAdapter(this, R.layout.activity_list_view, words)
         lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> }
+
         button_hint.setOnClickListener() {
             var hintline = 0
-            val random = Random()
             if (hintguess != totwords) {
                 hintline=rand(0, remainingwords.size)
+                //produce random word from remaining words and extract its line and position so it can be displayed on list view
                 var word=remainingwords.get(hintline)
                 var actualword=word.substring(0, word.indexOf(","))
                 var line = word.substring(word.indexOf(",")+1, word.lastIndexOf(","))
@@ -59,18 +71,23 @@ class GuessActivity : AppCompatActivity() {
                 Toast.makeText(getApplicationContext(), "Word unlocked: "+actualword,
                         Toast.LENGTH_SHORT).show();
                 remainingwords.removeAt(hintline)
+
                 Log.d("wordsleft", remainingwords.size.toString())
+
                 words.add(actualword+"   Line:"+line+" Word:"+position)
                 list.add(line+":"+position)
-                lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
+                lv.adapter = MyListAdapter(this, R.layout.activity_list_view, words)
                 hintguess+=1
+
                 Log.d("hintguess", hintguess.toString())
             } else {
-                Toast.makeText(getApplicationContext(), "All words unlocked",
+                Toast.makeText(getApplicationContext(), "All hints used",
                         Toast.LENGTH_SHORT).show();
             }
         }
+
         button_guesssong.setOnClickListener() {
+            //check if guess is correct and calculate score if it is
             val inputtext = editText.text.toString()
             if (inputtext.equals(title, ignoreCase = true)) {
                 var score = (100 * (totwords - wordguess) / totwords) * (1 + (thelevel + 1) * 0.2) - (wrongguess + 1) * 10 - (hintguess/totwords)*50
@@ -86,9 +103,11 @@ class GuessActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(getApplicationContext(), "Incorrect Answer!",
                         Toast.LENGTH_SHORT).show();
+                Log.d("wrongguessses", wrongguess.toString())
                 wrongguess = wrongguess + 1
             }
         }
+        //score is zero when user give up
         give_up.setOnClickListener()
         {
             var score=0
@@ -100,9 +119,8 @@ class GuessActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-    }
-
-    private fun generateListContent() {
+    }//generate list of words from lyrics
+    private fun generateremainingwords (){
         for (item in 0..lyrics.size-1) {
             if(lyrics.get(item)!="") {
                 var string = lyrics.get(item)
@@ -117,6 +135,9 @@ class GuessActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    private fun generateListContent() {
+        //produce list of all words user has unlocked, this is done by using line and position and number of spaces
         for (item in list) {
             var line = 0
             var position = 0
@@ -152,7 +173,7 @@ class GuessActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-    fun rand(from: Int, to: Int) : Int {
+    fun rand(from: Int, to: Int) : Int { //random integer generator function
         return random.nextInt(to - from) + from
     }
 
@@ -169,16 +190,19 @@ class GuessActivity : AppCompatActivity() {
 
     }
 
-    override fun onBackPressed() {
+    override fun onBackPressed() {//When user goes back send all changed variables, these will again be received through intent, ensure they don't reset
         val intent = Intent()
         intent.putStringArrayListExtra("listofwords", list)
         intent.putExtra("wordsguessed", wordguess)
         intent.putExtra("hintused", hintguess)
+        intent.putExtra("wrongguess", wrongguess)
+        intent.putExtra("hasgoneback", hasgoneback)
+        intent.putStringArrayListExtra("remainingwords", remainingwords)
         setResult(0, intent)
         super.onBackPressed()
     }
 
-    inner class MyListAdaper constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
+    inner class MyListAdapter constructor(context: Context, private val layout: Int, private val mObjects: List<String>) : ArrayAdapter<String>(context, layout, mObjects) {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             var convertView = convertView

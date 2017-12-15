@@ -13,6 +13,7 @@ import java.net.URL
 /**
  * Created by s1552184 on 08/11/17.
  */
+//code provided in lectures
 class DownloadXmlTask(private val caller : DownloadCompleteListener) :
         AsyncTask<String, Void, String>() {
     override fun doInBackground(vararg urls: String): String {

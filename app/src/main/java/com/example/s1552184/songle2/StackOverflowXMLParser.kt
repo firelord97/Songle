@@ -9,6 +9,7 @@ import java.io.InputStream
 /**
  * Created by s1552184 on 08/11/17.
  */
+//my data class song which I use to save details of the song list
 data class Song(val number: String, val artist: String, val title: String, val link: String ) {
 
 
