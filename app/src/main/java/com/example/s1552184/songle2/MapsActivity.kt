@@ -172,6 +172,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             println("[$tag] [onLocationChanged] Location unknown")
         } else {
             println("""[$tag] [onLocationChanged] Lat/long now(${current.latitude},${current.longitude})""")
+            mLastLocation!!.setLatitude(current.latitude)
+            mLastLocation!!.setLongitude(current.longitude)
         }
     }
 
