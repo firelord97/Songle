@@ -26,6 +26,7 @@ class GuessActivity : AppCompatActivity() {
     var lyrics = ArrayList<String>()
     var totwords = 0
     var wordguess = 0
+    var hintguess=0
     val random = Random()
     var remainingwords = ArrayList<String>()
     private val words = ArrayList<String>()
@@ -41,6 +42,7 @@ class GuessActivity : AppCompatActivity() {
         lyrics = guessIntent.getStringArrayListExtra("lyrics")
         wordguess = guessIntent.getIntExtra("words", 0)
         totwords = guessIntent.getIntExtra("totalwords", 0)
+        hintguess = guessIntent.getIntExtra("hintused", 0)
         val lv = findViewById<ListView>(R.id.listview) as ListView
         generateListContent()
         lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
@@ -48,7 +50,7 @@ class GuessActivity : AppCompatActivity() {
         button_hint.setOnClickListener() {
             var hintline = 0
             val random = Random()
-            if (wordguess != totwords) {
+            if (hintguess != totwords) {
                 hintline=rand(0, remainingwords.size)
                 var word=remainingwords.get(hintline)
                 var actualword=word.substring(0, word.indexOf(","))
@@ -57,10 +59,12 @@ class GuessActivity : AppCompatActivity() {
                 Toast.makeText(getApplicationContext(), "Word unlocked: "+actualword,
                         Toast.LENGTH_SHORT).show();
                 remainingwords.removeAt(hintline)
+                Log.d("wordsleft", remainingwords.size.toString())
                 words.add(actualword+"   Line:"+line+" Word:"+position)
                 list.add(line+":"+position)
                 lv.adapter = MyListAdaper(this, R.layout.activity_list_view, words)
-                wordguess+=1
+                hintguess+=1
+                Log.d("hintguess", hintguess.toString())
             } else {
                 Toast.makeText(getApplicationContext(), "All words unlocked",
                         Toast.LENGTH_SHORT).show();
@@ -69,7 +73,7 @@ class GuessActivity : AppCompatActivity() {
         button_guesssong.setOnClickListener() {
             val inputtext = editText.text.toString()
             if (inputtext.equals(title, ignoreCase = true)) {
-                var score = (100 * (totwords - wordguess) / totwords) * (1 + (thelevel + 1) * 0.2) - (wrongguess + 1) * 10
+                var score = (100 * (totwords - wordguess) / totwords) * (1 + (thelevel + 1) * 0.2) - (wrongguess + 1) * 10 - (hintguess/totwords)*50
                 Toast.makeText(getApplicationContext(), "Correct Answer!",
                         Toast.LENGTH_SHORT).show();
                 val intent = Intent(this@GuessActivity, CorrectAnswer::class.java)
@@ -169,6 +173,7 @@ class GuessActivity : AppCompatActivity() {
         val intent = Intent()
         intent.putStringArrayListExtra("listofwords", list)
         intent.putExtra("wordsguessed", wordguess)
+        intent.putExtra("hintused", hintguess)
         setResult(0, intent)
         super.onBackPressed()
     }

@@ -44,6 +44,7 @@ var songselect: Int = 0
 var levelselect: Int = 0
 var mapname=""
 var wordcount= 0
+var hintguess=0
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener, OnMarkerClickListener {
@@ -97,6 +98,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             intent.putStringArrayListExtra("unlockedwords", list)
             intent.putStringArrayListExtra("lyrics", lyrics)
             intent.putExtra("totalwords", wordcount)
+            intent.putExtra("hintused", hintguess)
             startActivityForResult(intent, 0)
 
 
@@ -163,6 +165,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
 
     override fun onConnectionSuspended(flag: Int) {
         println(">>>>onConnectionSuspended")
+
     }
 
     override fun onConnectionFailed(result: ConnectionResult) {
@@ -197,7 +200,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         val temp = Location(LocationManager.GPS_PROVIDER)
         temp.setLatitude(marker.position.latitude)
         temp.setLongitude(marker.position.longitude)
-        if (mLastLocation!!.distanceTo(temp) < 30) {
+        if (mLastLocation!!.distanceTo(temp) < 25) {
             if (marker.title in list) {
                 Toast.makeText(getApplicationContext(), "Word already unlocked",
                         Toast.LENGTH_SHORT).show();
@@ -234,7 +237,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
 
             }
         } else {
-            Toast.makeText(getApplicationContext(), "You are too far away to unlock the word",
+            Toast.makeText(getApplicationContext(), "You are too far away: "+Math.round(mLastLocation!!.distanceTo(temp)).toString()+" metres",
                     Toast.LENGTH_SHORT).show();
         }
         return false
@@ -258,6 +261,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         {
             list=data.getStringArrayListExtra("listofwords")
             wordsguessed = data.getIntExtra("wordsguessed", 0)
+            hintguess= data.getIntExtra("hintused", 0)
             val correctanswer: TextView = findViewById(R.id.correctanswers)
             correctanswer.setText(wordsguessed.toString() + "/" + wordcount.toString())
 

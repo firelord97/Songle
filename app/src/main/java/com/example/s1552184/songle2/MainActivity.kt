@@ -11,13 +11,13 @@ import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.InputStream
-var songs = ArrayList<Song>()
+var songs = ArrayList<Song>() //Saves parsed list of Songs
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-// The BroadcastReceiver that tracks network connectivity changes.
+        // The BroadcastReceiver that tracks network connectivity changes.
          var receiver = NetworkReceiver()
 // Register BroadcastReceiver to track connection changes.
             val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
